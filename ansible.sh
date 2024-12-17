@@ -1,4 +1,4 @@
 #!/bin/bash
-cd /root/amsible
+cd /root/ansible
 ansible-playbook wordpress.yml
 
