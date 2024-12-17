@@ -1,0 +1,42 @@
+pipeline {
+    agent { label "myagent"}
+
+    stages {
+        stage('code') {
+            steps {
+                git 'https://github.com/jacksneel/wordpress_project.git'
+            }
+        }
+        
+    stage('copy compose file to docker') {
+            steps {
+               sshPublisher(publishers: [sshPublisherDesc(configName: 'agent', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: 'rsync -avh  /myproject/workspace/mywordpress/docker-compose.yml  root@172.31.18.220:/root', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
+            }
+        }
+        
+    stage('copy playbook to ansible dire') {
+            steps {
+                sh 'cp /myproject/workspace/mywordpress/wordpress.yml /root/ansible'
+            }
+        }
+        
+    stage('Make scripts Executable') {
+            steps {
+                sh 'chmod a+x /myproject/workspace/mywordpress/*.sh'
+            }
+        } 
+        
+    stage('Build') {
+            steps {
+                sh './build.sh'
+            }
+        }
+        
+    stage('Deploy') {
+            steps {
+                sh './ansible.sh'
+            }
+        }    
+    }
+}
+
